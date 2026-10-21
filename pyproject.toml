@@ -72,3 +72,7 @@ addopts = "-v --cov=jc_speedtest --cov-report=term-missing"
 
 [tool.coverage.run]
 source = ["src/jc_speedtest"]
+
+[[tool.mypy.overrides]]
+module = ["speedtest"]
+ignore_missing_imports = true

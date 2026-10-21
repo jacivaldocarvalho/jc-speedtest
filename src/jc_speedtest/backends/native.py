@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import statistics
 import time
+from collections.abc import Callable
 
 import httpx
 
@@ -17,18 +18,26 @@ LATENCY_SAMPLES = 5
 DOWNLOAD_BYTES = 25_000_000  # 25 MB
 UPLOAD_BYTES = 10_000_000  # 10 MB
 
+ClientFactory = Callable[..., httpx.Client]
+TimeSource = Callable[[], float]
+
 
 class NativeBackend(SpeedtestBackend):
     """Measure speed using plain HTTP against Cloudflare's endpoints."""
 
     name = "native"
 
-    def __init__(self, base_url: str | None = None) -> None:
-        self.base_url = (
-            base_url
-            or os.getenv("JC_SPEEDTEST_BASE_URL")
-            or DEFAULT_BASE_URL
-        ).rstrip("/")
+    def __init__(
+        self,
+        base_url: str | None = None,
+        client_factory: ClientFactory | None = None,
+        time_source: TimeSource | None = None,
+    ) -> None:
+        self.base_url = (base_url or os.getenv("JC_SPEEDTEST_BASE_URL") or DEFAULT_BASE_URL).rstrip(
+            "/"
+        )
+        self._client_factory: ClientFactory = client_factory or httpx.Client
+        self._time: TimeSource = time_source or time.perf_counter
 
     def is_available(self) -> bool:
         return True
@@ -40,7 +49,7 @@ class NativeBackend(SpeedtestBackend):
         upload: bool = True,
         timeout: float = 10.0,
     ) -> SpeedtestResult:
-        with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+        with self._client_factory(timeout=timeout, follow_redirects=True) as client:
             ping_ms = self._measure_latency(client)
             download_mbps = self._measure_download(client) if download else None
             upload_mbps = self._measure_upload(client) if upload else None
@@ -57,9 +66,9 @@ class NativeBackend(SpeedtestBackend):
         samples: list[float] = []
         for _ in range(LATENCY_SAMPLES):
             try:
-                start = time.perf_counter()
+                start = self._time()
                 client.get(f"{self.base_url}/__down", params={"bytes": 0})
-                samples.append((time.perf_counter() - start) * 1000)
+                samples.append((self._time() - start) * 1000)
             except httpx.TimeoutException as exc:
                 raise MeasurementTimeoutError("latency probe timed out") from exc
             except httpx.HTTPError as exc:
@@ -68,13 +77,13 @@ class NativeBackend(SpeedtestBackend):
 
     def _measure_download(self, client: httpx.Client) -> float:
         try:
-            start = time.perf_counter()
+            start = self._time()
             with client.stream(
                 "GET", f"{self.base_url}/__down", params={"bytes": DOWNLOAD_BYTES}
             ) as response:
                 response.raise_for_status()
                 total = sum(len(chunk) for chunk in response.iter_bytes())
-            elapsed = time.perf_counter() - start
+            elapsed = self._time() - start
         except httpx.TimeoutException as exc:
             raise MeasurementTimeoutError("download measurement timed out") from exc
         except httpx.HTTPError as exc:
@@ -87,10 +96,10 @@ class NativeBackend(SpeedtestBackend):
     def _measure_upload(self, client: httpx.Client) -> float:
         payload = b"\x00" * UPLOAD_BYTES
         try:
-            start = time.perf_counter()
+            start = self._time()
             response = client.post(f"{self.base_url}/__up", content=payload)
             response.raise_for_status()
-            elapsed = time.perf_counter() - start
+            elapsed = self._time() - start
         except httpx.TimeoutException as exc:
             raise MeasurementTimeoutError("upload measurement timed out") from exc
         except httpx.HTTPError as exc:

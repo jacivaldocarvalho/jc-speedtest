@@ -14,6 +14,7 @@ def test_to_dict_is_json_friendly(sample_result: SpeedtestResult) -> None:
 
 def test_result_is_immutable(sample_result: SpeedtestResult) -> None:
     import dataclasses
+
     assert dataclasses.is_dataclass(sample_result)
     try:
         sample_result.download_mbps = 1.0  # type: ignore[misc]

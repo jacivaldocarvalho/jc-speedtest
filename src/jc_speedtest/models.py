@@ -18,9 +18,7 @@ class SpeedtestResult:
     ping_ms: float | None
     backend: BackendName
     server: str | None = None
-    timestamp: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to a JSON-friendly dictionary."""

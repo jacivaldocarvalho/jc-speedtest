@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Literal
 
 from jc_speedtest.backends import (
@@ -26,7 +27,12 @@ def _resolve_backend(preference: BackendPreference) -> SpeedtestBackend:
     for backend in candidates:
         if backend.is_available():
             return backend
-    # NativeBackend.is_available() always returns True, so this is defensive.
+
+    # Defensive: NativeBackend.is_available() always returns True.
+    warnings.warn(
+        "No preferred backend available; falling back to native.",
+        stacklevel=2,
+    )
     return NativeBackend()
 
 
@@ -51,6 +57,10 @@ def run_speedtest(
     Raises:
         MeasurementTimeoutError: If a phase exceeds the timeout.
         MeasurementFailedError: If a phase fails for any other reason.
+
+    Warns:
+        UserWarning: If the requested backend is unavailable and a fallback
+            is used.
     """
     selected = _resolve_backend(backend)
     return selected.measure(download=download, upload=upload, timeout=timeout)

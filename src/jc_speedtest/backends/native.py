@@ -49,7 +49,16 @@ class NativeBackend(SpeedtestBackend):
         upload: bool = True,
         timeout: float = 10.0,
     ) -> SpeedtestResult:
-        with self._client_factory(timeout=timeout, follow_redirects=True) as client:
+        # Granular timeout: `connect`/`pool` limitam handshakes;
+        # `read`/`write` limitam a inatividade entre chunks.
+        granular_timeout = httpx.Timeout(
+            connect=timeout,
+            pool=timeout,
+            read=max(30.0, timeout * 6),
+            write=max(30.0, timeout * 6),
+        )
+
+        with self._client_factory(timeout=granular_timeout, follow_redirects=True) as client:
             ping_ms = self._measure_latency(client)
             download_mbps = self._measure_download(client) if download else None
             upload_mbps = self._measure_upload(client) if upload else None
@@ -63,6 +72,14 @@ class NativeBackend(SpeedtestBackend):
         )
 
     def _measure_latency(self, client: httpx.Client) -> float:
+        # Warm-up: first request pays TCP + TLS handshake. Discard it.
+        try:
+            client.get(f"{self.base_url}/__down", params={"bytes": 0})
+        except httpx.TimeoutException as exc:
+            raise MeasurementTimeoutError("latency warm-up timed out") from exc
+        except httpx.HTTPError as exc:
+            raise MeasurementFailedError(f"latency warm-up failed: {exc}") from exc
+
         samples: list[float] = []
         for _ in range(LATENCY_SAMPLES):
             try:

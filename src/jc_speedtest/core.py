@@ -17,12 +17,12 @@ BackendPreference = Literal["auto", "native", "speedtest-cli"]
 
 def _resolve_backend(preference: BackendPreference) -> SpeedtestBackend:
     candidates: list[SpeedtestBackend]
-    if preference == "native":
-        candidates = [NativeBackend()]
-    elif preference == "speedtest-cli":
+    if preference == "speedtest-cli":
         candidates = [SpeedtestCliBackend()]
-    else:  # auto
-        candidates = [SpeedtestCliBackend(), NativeBackend()]
+    else:  # "native" ou "auto"
+        # O "auto" prioriza o nativo por ser mais leve e rápido.
+        # O speedtest-cli só entra na lista caso o usuário peça explicitamente.
+        candidates = [NativeBackend(), SpeedtestCliBackend()]
 
     for backend in candidates:
         if backend.is_available():

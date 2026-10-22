@@ -67,7 +67,10 @@ warn_unused_configs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov=jc_speedtest --cov-report=term-missing"
+addopts = "-v --cov=jc_speedtest --cov-report=term-missing -m 'not integration'"
+markers = [
+    "integration: tests that hit the real network (skipped by default)",
+]
 
 [tool.coverage.run]
 source = ["src/jc_speedtest"]

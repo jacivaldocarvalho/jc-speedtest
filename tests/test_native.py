@@ -154,8 +154,8 @@ def test_latency_uses_median() -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, content=b"")
 
-    # 5 samples => 10 calls to time_source. Values chosen so each sample is
-    # 10, 20, 30, 40, 50 ms. Median = 30.
+    # 5 samples => 10 calls to time_source. Each sample must be 10, 20, 30,
+    # 40, 50 ms so that the median is 30.
     times = _fake_time(
         [
             0.0,
@@ -177,3 +177,31 @@ def test_latency_uses_median() -> None:
     )
     value = backend._measure_latency(_make_client(handler))
     assert value == pytest.approx(30.0)
+
+
+def test_warmup_timeout_raises() -> None:
+    calls = {"n": 0}
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:  # warm-up
+            raise httpx.TimeoutException("boom")
+        return httpx.Response(200, content=b"")
+
+    backend = NativeBackend(base_url=BASE, client_factory=_factory(handler))
+    with pytest.raises(MeasurementTimeoutError):
+        backend._measure_latency(_make_client(handler))
+
+
+def test_warmup_http_error_raises() -> None:
+    calls = {"n": 0}
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:  # warm-up
+            raise httpx.HTTPError("kaboom")
+        return httpx.Response(200, content=b"")
+
+    backend = NativeBackend(base_url=BASE, client_factory=_factory(handler))
+    with pytest.raises(MeasurementFailedError):
+        backend._measure_latency(_make_client(handler))

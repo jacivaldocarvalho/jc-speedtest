@@ -7,21 +7,34 @@ name = "jc-speedtest"
 version = "0.1.0"
 description = "Lightweight, programmatic internet speed test for Python. No browser, no ads."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
     { name = "Jacivaldo Carvalho", email = "jacivaldocarvalho@gmail.com" }
 ]
 requires-python = ">=3.10"
+keywords = [
+    "speedtest",
+    "network",
+    "telecom",
+    "sre",
+    "devops",
+    "bandwidth",
+    "latency",
+    "diagnostics"
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
+    "Intended Audience :: Telecommunications Industry",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: System :: Networking",
+    "Topic :: System :: Systems Administration",
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
@@ -47,6 +60,7 @@ jc-speedtest = "jc_speedtest.cli:main"
 Homepage = "https://github.com/jacivaldocarvalho/jc-speedtest"
 Repository = "https://github.com/jacivaldocarvalho/jc-speedtest"
 Issues = "https://github.com/jacivaldocarvalho/jc-speedtest/issues"
+Changelog = "https://github.com/jacivaldocarvalho/jc-speedtest/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/jc_speedtest"]

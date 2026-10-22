@@ -1,7 +1,7 @@
 # JC SPEEDTEST
 
-[![PyPI](https://img.shields.io/pypi/v/jc-speedtest?cacheSeconds=300&v=2)](https://pypi.org/project/jc-speedtest/)
-[![Python](https://img.shields.io/pypi/pyversions/jc-speedtest)](https://pypi.org/project/jc-speedtest/)
+[![PyPI](https://img.shields.io/pypi/v/jc-speedtest?cacheSeconds=300)](https://pypi.org/project/jc-speedtest/)
+[![Python](https://img.shields.io/pypi/pyversions/jc-speedtest?cacheSeconds=300)](https://pypi.org/project/jc-speedtest/)
 [![CI](https://github.com/jacivaldocarvalho/jc-speedtest/actions/workflows/ci.yml/badge.svg)](https://github.com/jacivaldocarvalho/jc-speedtest/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/jacivaldocarvalho/jc-speedtest)](LICENSE)
 

@@ -13,3 +13,5 @@ htmlcov/
 .ruff_cache/
 *.whl
 *.tar.gz
+
+.local/

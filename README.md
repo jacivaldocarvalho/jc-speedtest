@@ -5,7 +5,11 @@
 [![CI](https://github.com/jacivaldocarvalho/jc-speedtest/actions/workflows/ci.yml/badge.svg)](https://github.com/jacivaldocarvalho/jc-speedtest/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/jacivaldocarvalho/jc-speedtest)](LICENSE)
 
-Internet speed and network performance checks for **Telecom infrastructure, Networking, DevOps and SRE**.
+Lightweight, programmatic internet speed and network performance checks for Telecom, Networking, DevOps, and SRE.
+
+<div align="center">
+  <img src="demo.gif" alt="jc-speedtest demo" width="600">
+</div>
 
 ## Features
 
